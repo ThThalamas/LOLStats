@@ -5,18 +5,12 @@
  */
 package lol_stat;
 
-
 /**
  *
- * @author Mathéo Dumont
+ * @author p1604707
  */
-public class LOL_Stat {
-
-    /**
-     * @param args the command line arguments
-     */
+public class InterfaceApp {
     public static void main(String[] args) {
-        // TODO code application logic here
-    }
-    
+        Interface Pf = new Interface();
+    }    
 }
