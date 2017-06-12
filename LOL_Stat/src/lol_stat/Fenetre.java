@@ -52,6 +52,7 @@ public class Fenetre extends JFrame {
     {
         
         JTabbedPane tabbedPane = new JTabbedPane();
+        tabbedPane.setBackground(Color.LIGHT_GRAY);
         tabbedPane.setPreferredSize(new Dimension(1000, 700));
         
         tabbedPane.addTab("Menu principal", MenuPrinc());
@@ -77,7 +78,9 @@ public class Fenetre extends JFrame {
     
     public JPanel MenuPrinc(){ // ne plus toucher
         JPanel panel = new JPanel();
+        panel.setBackground(Color.LIGHT_GRAY);    
         JPanel panelbouton = new JPanel();
+        panelbouton.setBackground(Color.LIGHT_GRAY);
         scroll.setPreferredSize(new Dimension(450,600));
          
 
@@ -177,6 +180,7 @@ public class Fenetre extends JFrame {
         //Avec grid layout le bouton est énorme
         
         JPanel panel = new JPanel();
+        setBackground(Color.orange);
         panel.add(combo);
         panel.add(label);
         panel.setLayout(new GridLayout(6,1)); 
