@@ -173,12 +173,13 @@ public class Fenetre extends JFrame {
         Object[] liste = new Object[]{"Sélectionner joueur","Mettre array list nom joueur"};
         JComboBox selectjoueur = new JComboBox(liste);      
         combo.add(selectjoueur);
-                //combo.setLayout(new GridLayout(1,1));  
+        //combo.setLayout(new GridLayout(1,1));  
+        //Avec grid layout le bouton est énorme
         
         JPanel panel = new JPanel();
         panel.add(combo);
         panel.add(label);
-        panel.setLayout(new GridLayout(2,1)); 
+        panel.setLayout(new GridLayout(6,1)); 
         setVisible(true);
         return panel;
     }
