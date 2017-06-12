@@ -17,17 +17,25 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.KeyEvent;
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.border.EmptyBorder;
 
 public class Fenetre extends JFrame {
-
+    JTable jt;          // il faut en faite utiliser un jtable global à tout le projet, c'est plus facile,
+    JScrollPane scroll; // mais c ce scrollPane qu'il faut afficher et non la jtable, puisqu'il la contient(la JTable), je l'ai déjà fait dans menuPrinc
+    
     public Fenetre() {
         super();
+        jt = new JTable();
+        scroll = new JScrollPane(jt);
         build();
     }
     public void build()
@@ -65,6 +73,36 @@ public class Fenetre extends JFrame {
         
         return tabbedPane;
     }
+    
+    public JPanel MenuPrinc(){ // ne plus toucher
+        JPanel panel = new JPanel();
+        JPanel panelbouton = new JPanel();
+        scroll.setPreferredSize(new Dimension(450,600));
+         
+
+        
+        JButton mmr = new JButton("Afficher joueurs triés par MMR"); 
+        JButton role = new JButton("Afficher joueurs triés par rôle"); 
+        JButton afficher = new JButton("Afficher champions");
+        
+        
+        panelbouton.setLayout(new GridLayout(3,1,20,20));
+        panel.setLayout(new FlowLayout(5,30,30)/*new BorderLayout(10,10)*/);
+        
+        
+        panelbouton.add(mmr);
+        panelbouton.add(role);
+        panelbouton.add(afficher);
+        
+        
+
+        //paneltable.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        panel.add(scroll);        
+        panel.add(panelbouton);
+        setVisible(true);
+        return panel;
+    }
+    
     public JPanel ajouter()
     {
         JPanel label = new JPanel();
@@ -103,35 +141,7 @@ public class Fenetre extends JFrame {
     }
 
     
-    public JPanel MenuPrinc(){
-        JPanel panel = new JPanel();
-        JPanel paneltable = new JPanel();
-        JPanel panelbouton = new JPanel();
-        paneltable.setSize(200,200);
-        
-        JTable table = new JTable();
-
-        table.setSize(500,500);
-        JButton mmr = new JButton("Afficher joueurs triés par MMR"); 
-        JButton role = new JButton("Afficher joueurs triés par rôle"); 
-        JButton afficher = new JButton("Afficher champions");
-        
-        panelbouton.setLayout(new BorderLayout(10,10));
-        panel.setLayout(new BorderLayout(10,10));
-        
-        
-        panelbouton.add(mmr,BorderLayout.NORTH);
-        panelbouton.add(role,BorderLayout.CENTER);
-        panelbouton.add(afficher,BorderLayout.SOUTH);
-        
-        
-        paneltable.add(table); 
-        paneltable.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        panel.add(paneltable,BorderLayout.WEST);        
-        panel.add(panelbouton,BorderLayout.EAST);
-        setVisible(true);
-        return panel;
-    }
+    
     
     public JPanel lancerPartie(){
         JPanel panel = new JPanel();
