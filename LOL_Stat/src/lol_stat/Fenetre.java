@@ -31,6 +31,7 @@ import java.sql.Statement;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
@@ -177,7 +178,33 @@ public class Fenetre extends JFrame {
     
     public JPanel stat()
     {
+        JPanel label = new JPanel();
+        JLabel Main = new JLabel("Main :                   ");
+        JLabel Mainvalue = new JLabel("null");
+        JLabel nombre = new JLabel("Nombre de partie(s) jouées :");
+        JLabel nombrevalue = new JLabel("null");
+        JLabel pourcent = new JLabel("Pourcentage de victoire :");
+        JLabel pourcentvalue = new JLabel("null");
+        label.add(Main);
+        label.add(Mainvalue);        
+        label.add(nombre);
+        label.add(nombrevalue);
+        label.add(pourcent); 
+        label.add(pourcentvalue); 
+        label.setLayout(new GridLayout(3, 2));   
+
+        JPanel combo = new JPanel();
+        Object[] liste = new Object[]{"Sélectionner joueur","Mettre array list nom joueur"};
+        JComboBox selectjoueur = new JComboBox(liste);      
+        combo.add(selectjoueur);
+        //combo.setLayout(new GridLayout(1,1));  
+        //Avec grid layout le bouton est énorme
+        
         JPanel panel = new JPanel();
+        panel.add(combo);
+        panel.add(label);
+        panel.setLayout(new GridLayout(6,1)); 
+        setVisible(true);
         return panel;
     }
     
