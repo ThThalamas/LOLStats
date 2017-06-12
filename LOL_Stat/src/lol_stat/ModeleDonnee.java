@@ -14,8 +14,8 @@ import javax.swing.table.TableModel;
  */
 public class ModeleDonnee extends AbstractTableModel implements TableModel{
     
-    protected String[]nomColonnes;
-    protected Object [][]données;
+    protected String[]nomColonnes = null;
+    protected Object [][]données = new Object[0][0];
     
     public ModeleDonnee(String[]nom,Object[][]données)
     {
@@ -25,15 +25,12 @@ public class ModeleDonnee extends AbstractTableModel implements TableModel{
 
     @Override
     public int getRowCount() {
-        if(données.length==0) 
-            return 0;
-        else 
-            return données[0].length;
+        return données[0].length;
     }
 
     @Override
     public int getColumnCount() {
-        return données.length;
+        return nomColonnes.length;
     }
 
     @Override
