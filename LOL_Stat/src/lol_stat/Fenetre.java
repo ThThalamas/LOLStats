@@ -19,7 +19,15 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -28,14 +36,20 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
-public class Fenetre extends JFrame {
-    JTable jt;          // il faut en faite utiliser un jtable global à tout le projet, c'est plus facile,
-    JScrollPane scroll; // mais c ce scrollPane qu'il faut afficher et non la jtable, puisqu'il la contient(la JTable), je l'ai déjà fait dans menuPrinc
+public class Fenetre extends JFrame {      
+    protected JScrollPane scroll; // mais c ce scrollPane qu'il faut afficher et non la jtable, puisqu'il la contient(la JTable), je l'ai déjà fait dans menuPrinc
+    private Connection con;
     
     public Fenetre() {
         super();
-        jt = new JTable();
-        scroll = new JScrollPane(jt);
+        
+        scroll = new JScrollPane();
+        try
+        {
+            con = DriverManager.getConnection(
+            "jdbc:oracle:thin:@134.214.112.67:1521:orcl","p1603697","267785");
+            
+        }catch(SQLException e){}
         build();
     }
     public void build()
@@ -43,7 +57,7 @@ public class Fenetre extends JFrame {
         setTitle("Scoring League Of Legend");
         setContentPane(content());
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setResizable(true);
+        setResizable(false);
         pack();
         setVisible(true);
     }
@@ -81,7 +95,7 @@ public class Fenetre extends JFrame {
          
 
         
-        JButton mmr = new JButton("Afficher joueurs triés par MMR"); 
+        JButton mmr = new JButton("Afficher joueurs triés par MMR");
         JButton role = new JButton("Afficher joueurs triés par rôle"); 
         JButton afficher = new JButton("Afficher champions");
         
@@ -99,7 +113,17 @@ public class Fenetre extends JFrame {
         //paneltable.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         panel.add(scroll);        
         panel.add(panelbouton);
-        setVisible(true);
+        
+        mmr.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e)
+                {
+                    String requete = "select * from Joueur order by mmr desc";
+                    
+                    scroll = new JScrollPane(new JTable(requete(con,requete)));
+                    scroll.updateUI();
+                }
+        });
         return panel;
     }
     
@@ -157,6 +181,61 @@ public class Fenetre extends JFrame {
         return panel;
     }
     
+    public ModeleDonnee requete(Connection con,String requête) // retourne une instance de ModeleDonnee
+    {
+        Statement stmt;
+        ResultSet rs;
+        ResultSetMetaData rsMeta;
+        String []nom = null ;
+        Object [][]colonnes = new Object[0][0];
+        ModeleDonnee mod;
+        
+        try
+        {
+            stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+            rs = stmt.executeQuery(requête);
+            rsMeta = rs.getMetaData();
+            nom = new String[rsMeta.getColumnCount()];// On initialise notre tableau de nom de colonnes
+            
+            for(int i = 1; i <= rsMeta.getColumnCount(); i++) // On recupère les nom des colonnes
+            {
+                nom[i-1] = rsMeta.getColumnName(i).toUpperCase();
+                //System.out.printf("%s ",nom[i-1]);
+            }
+           
+            
+            rs.last(); // on place le curseur à la fin 
+            int nombreLignes = rs.getRow(); //on récupère le numéro de la ligne 
+            rs.beforeFirst(); //on replace le curseur avant la première ligne 
+            int nombreColonnes = rsMeta.getColumnCount();
+            //System.out.println("Nombre de ligne(s) : "+nombreLignes+"\n"+"Nombre de colonne(s) : "+rsMeta.getColumnCount());
+            
+            colonnes = new Object[nombreLignes][nombreColonnes];
+            //colonnes = new String[nombreLignes-1][nombreColonnes-1]; 
+            
+            
+            while(rs.next())
+            {   
+                Object obj[] = new Object[nombreColonnes];
+                for(int i = 0 ; i < nombreColonnes ; i++)
+                {
+                    obj[i] = rs.getObject(i+1);
+                }
+               
+                for(int el = 0 ; el < nombreColonnes ; el++)
+                {
+                    colonnes [rs.getRow()-1][el] = obj[el];
+                }
+                
+            }
+           
+            stmt.close();
+            rs.close();
+        }catch(Exception e){}
+        mod = new ModeleDonnee(nom, colonnes);
+        
+        return mod;
+    }
     
     public static void main (String[]arg)
     {

@@ -7,3 +7,6 @@ begin
   insert into Joueur values(i++,pseudo,rank,mmr);
   
 end ajouterJoueur;
+/
+
+select * from JOUEUR  order by MMR desc;

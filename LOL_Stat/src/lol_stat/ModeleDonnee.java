@@ -25,7 +25,7 @@ public class ModeleDonnee extends AbstractTableModel implements TableModel{
 
     @Override
     public int getRowCount() {
-        return données[0].length;
+        return données.length;
     }
 
     @Override
