@@ -37,16 +37,20 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.JTextPane;
 import javax.swing.border.EmptyBorder;
+import javax.swing.text.JTextComponent;
 
 public class Fenetre extends JFrame {      
-    protected JScrollPane scroll; // mais c ce scrollPane qu'il faut afficher et non la jtable, puisqu'il la contient(la JTable), je l'ai déjà fait dans menuPrinc
+    protected JScrollPane scrollMenuPrinc; // mais c ce scrollPane qu'il faut afficher et non la jtable, puisqu'il la contient(la JTable), je l'ai déjà fait dans menuPrinc
+    protected JScrollPane scrollLancerPartie;
     private Connection con;
     
     public Fenetre() {
         super();
         
-        scroll = new JScrollPane();
+        scrollMenuPrinc = new JScrollPane();
+        scrollLancerPartie = new JScrollPane();
         try
         {
             con = DriverManager.getConnection(
@@ -100,7 +104,7 @@ public class Fenetre extends JFrame {
         panel.setBackground(Color.LIGHT_GRAY);    
         JPanel panelbouton = new JPanel();
         panelbouton.setBackground(Color.LIGHT_GRAY);
-        scroll.setPreferredSize(new Dimension(550,600));
+        scrollMenuPrinc.setPreferredSize(new Dimension(550,600));
          
 
         
@@ -120,7 +124,7 @@ public class Fenetre extends JFrame {
         
 
         //paneltable.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        panel.add(scroll);        
+        panel.add(scrollMenuPrinc);        
         panel.add(panelbouton);
         
         mmr.addActionListener(new ActionListener() {
@@ -129,9 +133,9 @@ public class Fenetre extends JFrame {
                 {
                     String requete = "select * from Joueur order by mmr desc";
                     JTable table = new JTable(requete(con,requete));
-                    scroll.setViewportView(table);
-                    scroll.revalidate();
-                    scroll.repaint();
+                    scrollMenuPrinc.setViewportView(table);
+                    scrollMenuPrinc.revalidate();
+                    scrollMenuPrinc.repaint();
                 };
         });
         return panel;
@@ -183,21 +187,18 @@ public class Fenetre extends JFrame {
         JComboBox<String> jComboBox1;
         JComboBox<String> jComboBox2;
         JComboBox<String> jComboBox3;
-        JScrollPane jScrollPane1;
-        JScrollPane jScrollPane2;
-        JTable jTable1;
-        JTextArea jTextArea1;
+        JTextArea JText;
+        
+        
         // End of variables declaration
        
         jComboBox1 = new JComboBox<>();
         jComboBox2 = new JComboBox<>();
         jComboBox3 = new JComboBox<>();
         jButton1 = new JButton();
-        jScrollPane1 = new JScrollPane();
-        jTextArea1 = new JTextArea();
+        JText = new JTextArea();
         jButton2 = new JButton();
-        jScrollPane2 = new JScrollPane();
-        jTable1 = new JTable();
+        
  
         setPreferredSize(new Dimension(1000, 700));
  
@@ -213,9 +214,8 @@ public class Fenetre extends JFrame {
         jButton1.setBackground(new java.awt.Color(204, 204, 204));
         jButton1.setText("Ajouter Joueur");
  
-        jTextArea1.setColumns(20);
-        jTextArea1.setRows(5);
-        jScrollPane1.setViewportView(jTextArea1);
+        
+        
  
         jButton2.setBackground(new java.awt.Color(102, 102, 102));
         jButton2.setFont(new java.awt.Font("Tahoma", 1, 25)); // NOI18N
@@ -229,15 +229,14 @@ public class Fenetre extends JFrame {
         JPanel panel = new JPanel();
         GroupLayout layout = new GroupLayout(panel);
         panel.setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+        layout.setHorizontalGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(24, 24, 24)
-                        .addComponent(jScrollPane2, GroupLayout.PREFERRED_SIZE, 403, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(scrollLancerPartie, GroupLayout.PREFERRED_SIZE, 403, GroupLayout.PREFERRED_SIZE)
                         .addGap(49, 49, 49)
-                        .addComponent(jScrollPane1, GroupLayout.PREFERRED_SIZE, 247, GroupLayout.PREFERRED_SIZE))
+                        .addComponent(JText, GroupLayout.PREFERRED_SIZE, 247, GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(44, 44, 44)
                         .addComponent(jComboBox1, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE)
@@ -252,13 +251,12 @@ public class Fenetre extends JFrame {
                         .addComponent(jButton2, GroupLayout.PREFERRED_SIZE, 219, GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(340, Short.MAX_VALUE))
         );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+        layout.setVerticalGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(19, 19, 19)
                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jScrollPane2, GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, GroupLayout.DEFAULT_SIZE, 271, Short.MAX_VALUE))
+                    .addComponent(scrollLancerPartie, GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addComponent(JText, GroupLayout.DEFAULT_SIZE, 271, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 44, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                     .addComponent(jComboBox1, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
@@ -276,10 +274,9 @@ public class Fenetre extends JFrame {
         panel.add(jComboBox3);
         panel.add(jButton1);
         panel.add(jButton1);
-        panel.add(jScrollPane1);
-        panel.add(jScrollPane2);
-        panel.add(jTextArea1);
-        panel.add(jTable1);
+        panel.add(JText);
+        panel.add(scrollLancerPartie);
+        
         
         
         return panel;
