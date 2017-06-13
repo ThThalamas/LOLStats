@@ -17,10 +17,23 @@ public class ModeleDonnee extends AbstractTableModel implements TableModel{
     protected String[]nomColonnes = null;
     protected Object [][]données = new Object[0][0];
     
+    public ModeleDonnee()
+    {
+        super();
+    }
     public ModeleDonnee(String[]nom,Object[][]données)
     {
+        super();
         nomColonnes = nom;
         this.données = données;
+    }
+    
+    public ModeleDonnee(ModeleDonnee mod)
+    {
+        super();
+        this.nomColonnes = mod.nomColonnes;
+        this.données = mod.données;
+        
     }
 
     @Override

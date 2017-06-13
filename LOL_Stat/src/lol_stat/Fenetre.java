@@ -19,9 +19,11 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import java.awt.List;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -29,11 +31,14 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
@@ -41,6 +46,9 @@ import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.JTextComponent;
+import static jdk.internal.org.objectweb.asm.util.Printer.TYPES;
+import java.sql.Types;
+import java.util.ArrayList;
 
 public class Fenetre extends JFrame {      
     protected JScrollPane scrollMenuPrinc; // mais c ce scrollPane qu'il faut afficher et non la jtable, puisqu'il la contient(la JTable), je l'ai déjà fait dans menuPrinc
@@ -48,6 +56,7 @@ public class Fenetre extends JFrame {
     protected PreparedStatement pstmtMMR;
     protected PreparedStatement pstmtROLE;
     protected PreparedStatement pstmtCHAMP;
+    
     protected Connection con;
     
     public Fenetre() {
@@ -63,6 +72,7 @@ public class Fenetre extends JFrame {
             pstmtMMR = con.prepareStatement("Select Pseudo,rank,mmr from joueur order by mmr desc",ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
             pstmtROLE = con.prepareStatement("select distinct pseudo,rank,nom,role from joueur,partie,champion where joueur.idjoueur = partie.idjoueur and partie.idchamp = champion.idchamp  order by role",ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
             pstmtCHAMP = con.prepareStatement("select nom,role from champion order by role",ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+            
         }catch(SQLException e){
             e.printStackTrace();
         }
@@ -174,23 +184,36 @@ public class Fenetre extends JFrame {
         JLabel Pseudo = new JLabel("Pseudo");
         JLabel Mmr = new JLabel("MMR");
         JLabel Main = new JLabel("Rank");
+        
+        Dimension dimjt = new Dimension(200,40);
+        
+        Pseudo.setPreferredSize(dimjt);
+        Mmr.setPreferredSize(dimjt);
+        Main.setPreferredSize(dimjt);
+        
         label.add(Pseudo);
         label.add(Mmr);
         label.add(Main);
         //label.setLayout(new FlowLayout());
         
         JPanel tf = new JPanel();
-        JTextField Pseudotf = new JTextField("          ");
-        JTextField Mmrtf = new JTextField("          ");
-        JTextField Maintf = new JTextField("          ");
+        JTextField Pseudotf = new JTextField();
+        JTextField Mmrtf = new JTextField();
+        JTextField rang = new JTextField();
+        
+        
+        Pseudotf.setPreferredSize(dimjt);
+        Mmrtf.setPreferredSize(dimjt);
+        rang.setPreferredSize(dimjt);
+        
         tf.add(Pseudotf);
         tf.add(Mmrtf);
-        tf.add(Maintf);
+        tf.add(rang);
         //tf.setLayout(new FlowLayout());
         
         JPanel bt = new JPanel();
-        JButton ajouterjoueur = new JButton("Ajouter joueur");
-        bt.add(ajouterjoueur);
+        JButton ajouterJoueur = new JButton("Ajouter joueur");
+        bt.add(ajouterJoueur);
         
         JPanel condense = new JPanel();
         condense.add(label);
@@ -199,9 +222,66 @@ public class Fenetre extends JFrame {
         
         JPanel panel = new JPanel();
         panel.add(condense);
-        panel.add(ajouterjoueur);
-        
-        
+        panel.add(ajouterJoueur);
+        ajouterJoueur.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e)
+                {
+                    try{
+                        try(
+                        CallableStatement cst = con.prepareCall("{call ajouterJoueur(?,?,?) }");
+                        ){
+                            String pseu = null,rangg = null;
+                            int mmrr = 0;
+                            boolean reussie = true;
+                            if(Pseudotf != null)
+                            {
+                                pseu = new String(Pseudotf.getText());
+                               
+                                //cst.setString("Pseudo",Pseudotf.getText());
+                                if(Mmrtf != null)
+                                {
+                                    mmrr = Integer.parseInt(Mmrtf.getText());
+                                    
+                                    //cst.setInt("MMR",mmrtf.;)
+                                    if(rang != null)
+                                        rangg = new String(rang.getText());
+                                    else
+                                        reussie = false;
+                                }
+                                else
+                                    reussie = false;
+                            }
+                            else 
+                                reussie = false;
+                            boolean exec = false;
+                            
+                            if(reussie)
+                            {
+                                cst.setString(1,pseu);
+                                cst.setString(2, rangg);
+                                cst.setInt(3,mmrr);
+                                
+                                exec = cst.execute();
+                                if(!exec)
+                                {
+                                    JOptionPane.showMessageDialog(null, "Insertion réussie !");
+                                }
+                                else
+                                    JOptionPane.showMessageDialog(null, "L'Insertion n'as pas réussie ");
+                                
+                            }
+                            /*JTable table = new JTable(requete(con,pstmtCHAMP));
+                            scrollMenuPrinc.setViewportView(table);
+                            scrollMenuPrinc.revalidate();
+                            scrollMenuPrinc.repaint();*/
+                        }
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        JOptionPane.showMessageDialog(null, "A problem has occured");
+                    }
+                };
+        });
         return panel;
     }
 
@@ -317,10 +397,30 @@ public class Fenetre extends JFrame {
         JPanel label = new JPanel();
         JLabel Main = new JLabel("Main :                   ");
         JLabel Mainvalue = new JLabel("null");
-        JLabel nombre = new JLabel("Nombre de partie(s) jouées :");
+        JLabel nombre = new JLabel("Nombre de partie(s) jouée(s) :");
         JLabel nombrevalue = new JLabel("null");
         JLabel pourcent = new JLabel("Pourcentage de victoire :");
         JLabel pourcentvalue = new JLabel("null");
+        
+        ModeleDonnee mod = new ModeleDonnee(requete(con,"select pseudo from joueur"));
+        
+        JComboBox selectjoueur = new JComboBox();
+        selectjoueur.addItem("Selectionner Joueur");
+        for(int i = 0 ; i < mod.getRowCount(); i++)
+        {
+            selectjoueur.addItem(mod.getValueAt(i, 0));
+        }
+        selectjoueur.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String joueurselec = selectjoueur.getSelectedItem().toString();
+                nombrevalue.setText(new ModeleDonnee(requete(con,"select count(*) from joueur, partie "
+                        + "where joueur.idjoueur = partie.idjoueur and pseudo ='{joueurselec}' ")).getValueAt(0,0).toString());
+                //pourcent.setText(new ModeleDonnee(requete(con,"select ")));
+            }
+            
+        });
+        
         label.add(Main);
         label.add(Mainvalue);        
         label.add(nombre);
@@ -330,11 +430,14 @@ public class Fenetre extends JFrame {
         label.setLayout(new GridLayout(3, 2));   
 
         JPanel combo = new JPanel();
-        Object[] liste = new Object[]{"Sélectionner joueur","Mettre array list nom joueur"};
-        JComboBox selectjoueur = new JComboBox(liste);      
+        
+        
+        
         combo.add(selectjoueur);
-        //combo.setLayout(new GridLayout(1,1));  
-        //Avec grid layout le bouton est énorme
+        
+        
+        
+        
         
         JPanel panel = new JPanel();
         setBackground(Color.orange);
@@ -359,6 +462,72 @@ public class Fenetre extends JFrame {
             try(
                 //Statement stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
                 ResultSet rs = requete.executeQuery();
+                
+            ){
+                rsMeta = rs.getMetaData();
+            
+            
+            
+           
+                nom = new String[rsMeta.getColumnCount()];// On initialise notre tableau de nom de colonnes
+
+                for(int i = 1; i <= rsMeta.getColumnCount(); i++) // On recupère les nom des colonnes
+                {
+                    nom[i-1] = rsMeta.getColumnName(i).toUpperCase();
+                    //System.out.printf("%s ",nom[i-1]);
+                }
+
+
+                rs.last(); // on place le curseur à la fin 
+                int nombreLignes = rs.getRow(); //on récupère le numéro de la ligne 
+                rs.beforeFirst(); //on replace le curseur avant la première ligne 
+                int nombreColonnes = rsMeta.getColumnCount();
+                //System.out.println("Nombre de ligne(s) : "+nombreLignes+"\n"+"Nombre de colonne(s) : "+rsMeta.getColumnCount());
+
+                colonnes = new Object[nombreLignes][nombreColonnes];
+                //colonnes = new String[nombreLignes-1][nombreColonnes-1]; 
+
+
+                while(rs.next())
+                {   
+                    Object obj[] = new Object[nombreColonnes];
+                    for(int i = 0 ; i < nombreColonnes ; i++)
+                    {
+                        obj[i] = rs.getObject(i+1);
+                    }
+
+                    for(int el = 0 ; el < nombreColonnes ; el++)
+                    {
+                        colonnes [rs.getRow()-1][el] = obj[el];
+                    }
+                }
+           
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        
+        mod = new ModeleDonnee(nom, colonnes);
+        if(mod == null)
+            return null;
+        else
+             return mod;
+    }
+    
+    public ModeleDonnee requete(Connection con,String requete) // retourne une instance de ModeleDonnee
+    {
+        
+        String []nom = null ;
+        Object [][]colonnes = new Object[0][0];
+        ModeleDonnee mod;
+        ResultSetMetaData rsMeta ;
+        
+        
+        try
+        {
+            try(
+                Statement stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+                ResultSet rs = stmt.executeQuery(requete);
                 
             ){
                 rsMeta = rs.getMetaData();
