@@ -30,10 +30,12 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
@@ -50,7 +52,10 @@ public class Fenetre extends JFrame {
             con = DriverManager.getConnection(
             "jdbc:oracle:thin:@134.214.112.67:1521:orcl","p1603697","267785");
             
-        }catch(SQLException e){}
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
+        
         build();
     }
     public void build()
@@ -95,7 +100,7 @@ public class Fenetre extends JFrame {
         panel.setBackground(Color.LIGHT_GRAY);    
         JPanel panelbouton = new JPanel();
         panelbouton.setBackground(Color.LIGHT_GRAY);
-        scroll.setPreferredSize(new Dimension(450,600));
+        scroll.setPreferredSize(new Dimension(550,600));
          
 
         
@@ -123,10 +128,11 @@ public class Fenetre extends JFrame {
                 public void actionPerformed(ActionEvent e)
                 {
                     String requete = "select * from Joueur order by mmr desc";
-                    
-                    scroll = new JScrollPane(new JTable(requete(con,requete)));
-                    scroll.updateUI();
-                }
+                    JTable table = new JTable(requete(con,requete));
+                    scroll.setViewportView(table);
+                    scroll.revalidate();
+                    scroll.repaint();
+                };
         });
         return panel;
     }
@@ -171,13 +177,116 @@ public class Fenetre extends JFrame {
     
     
     
-    public JPanel lancerPartie(){
+   public JPanel lancerPartie(){
+        JButton jButton1;
+        JButton jButton2;
+        JComboBox<String> jComboBox1;
+        JComboBox<String> jComboBox2;
+        JComboBox<String> jComboBox3;
+        JScrollPane jScrollPane1;
+        JScrollPane jScrollPane2;
+        JTable jTable1;
+        JTextArea jTextArea1;
+        // End of variables declaration
+       
+        jComboBox1 = new JComboBox<>();
+        jComboBox2 = new JComboBox<>();
+        jComboBox3 = new JComboBox<>();
+        jButton1 = new JButton();
+        jScrollPane1 = new JScrollPane();
+        jTextArea1 = new JTextArea();
+        jButton2 = new JButton();
+        jScrollPane2 = new JScrollPane();
+        jTable1 = new JTable();
+ 
+        setPreferredSize(new Dimension(1000, 700));
+ 
+        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Joueur", "item 2", "Item 3", "Item 4" }));
+        jComboBox1.setPreferredSize(new Dimension(60, 20));
+ 
+        jComboBox2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Champion", "Item 2", "Item 3", "Item 4" }));
+        jComboBox2.setPreferredSize(new Dimension(60, 20));
+ 
+        jComboBox3.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Rôle Champion", "Item 2", "Item 3", "Item 4" }));
+        jComboBox3.setPreferredSize(new Dimension(60, 20));
+ 
+        jButton1.setBackground(new java.awt.Color(204, 204, 204));
+        jButton1.setText("Ajouter Joueur");
+ 
+        jTextArea1.setColumns(20);
+        jTextArea1.setRows(5);
+        jScrollPane1.setViewportView(jTextArea1);
+ 
+        jButton2.setBackground(new java.awt.Color(102, 102, 102));
+        jButton2.setFont(new java.awt.Font("Tahoma", 1, 25)); // NOI18N
+        jButton2.setForeground(new java.awt.Color(189, 179, 203));
+        jButton2.setText("Lancer Partie !");
+ 
+        
+        
+        
+        
         JPanel panel = new JPanel();
-        JLabel info = new JLabel("Label");
-        panel.add(info);
-        setVisible(true);
+        GroupLayout layout = new GroupLayout(panel);
+        panel.setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(24, 24, 24)
+                        .addComponent(jScrollPane2, GroupLayout.PREFERRED_SIZE, 403, GroupLayout.PREFERRED_SIZE)
+                        .addGap(49, 49, 49)
+                        .addComponent(jScrollPane1, GroupLayout.PREFERRED_SIZE, 247, GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(44, 44, 44)
+                        .addComponent(jComboBox1, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE)
+                        .addGap(64, 64, 64)
+                        .addComponent(jComboBox3, GroupLayout.PREFERRED_SIZE, 112, GroupLayout.PREFERRED_SIZE)
+                        .addGap(62, 62, 62)
+                        .addComponent(jComboBox2, GroupLayout.PREFERRED_SIZE, 112, GroupLayout.PREFERRED_SIZE)
+                        .addGap(60, 60, 60)
+                        .addComponent(jButton1, GroupLayout.PREFERRED_SIZE, 116, GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(246, 246, 246)
+                        .addComponent(jButton2, GroupLayout.PREFERRED_SIZE, 219, GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(340, Short.MAX_VALUE))
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(19, 19, 19)
+                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jScrollPane2, GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, GroupLayout.DEFAULT_SIZE, 271, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 44, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                    .addComponent(jComboBox1, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jComboBox3, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jComboBox2, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton1, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE))
+                .addGap(40, 40, 40)
+                .addComponent(jButton2, GroupLayout.PREFERRED_SIZE, 64, GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(328, Short.MAX_VALUE))
+        );
+    
+        
+        panel.add(jComboBox1);
+        panel.add(jComboBox2);
+        panel.add(jComboBox3);
+        panel.add(jButton1);
+        panel.add(jButton1);
+        panel.add(jScrollPane1);
+        panel.add(jScrollPane2);
+        panel.add(jTextArea1);
+        panel.add(jTable1);
+        
+        
         return panel;
     }
+ 
+ 
+
     
     public JPanel stat()
     {
@@ -214,58 +323,68 @@ public class Fenetre extends JFrame {
     
     public ModeleDonnee requete(Connection con,String requête) // retourne une instance de ModeleDonnee
     {
-        Statement stmt;
-        ResultSet rs;
-        ResultSetMetaData rsMeta;
+        
         String []nom = null ;
         Object [][]colonnes = new Object[0][0];
         ModeleDonnee mod;
+        ResultSetMetaData rsMeta ;
+        
         
         try
         {
-            stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
-            rs = stmt.executeQuery(requête);
-            rsMeta = rs.getMetaData();
-            nom = new String[rsMeta.getColumnCount()];// On initialise notre tableau de nom de colonnes
-            
-            for(int i = 1; i <= rsMeta.getColumnCount(); i++) // On recupère les nom des colonnes
-            {
-                nom[i-1] = rsMeta.getColumnName(i).toUpperCase();
-                //System.out.printf("%s ",nom[i-1]);
-            }
-           
-            
-            rs.last(); // on place le curseur à la fin 
-            int nombreLignes = rs.getRow(); //on récupère le numéro de la ligne 
-            rs.beforeFirst(); //on replace le curseur avant la première ligne 
-            int nombreColonnes = rsMeta.getColumnCount();
-            //System.out.println("Nombre de ligne(s) : "+nombreLignes+"\n"+"Nombre de colonne(s) : "+rsMeta.getColumnCount());
-            
-            colonnes = new Object[nombreLignes][nombreColonnes];
-            //colonnes = new String[nombreLignes-1][nombreColonnes-1]; 
-            
-            
-            while(rs.next())
-            {   
-                Object obj[] = new Object[nombreColonnes];
-                for(int i = 0 ; i < nombreColonnes ; i++)
-                {
-                    obj[i] = rs.getObject(i+1);
-                }
-               
-                for(int el = 0 ; el < nombreColonnes ; el++)
-                {
-                    colonnes [rs.getRow()-1][el] = obj[el];
-                }
+            try(
+                Statement stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+                ResultSet rs = stmt.executeQuery(requête);
                 
-            }
+            ){
+                rsMeta = rs.getMetaData();
+            
+            
+            
            
-            stmt.close();
-            rs.close();
-        }catch(Exception e){}
-        mod = new ModeleDonnee(nom, colonnes);
+                nom = new String[rsMeta.getColumnCount()];// On initialise notre tableau de nom de colonnes
+
+                for(int i = 1; i <= rsMeta.getColumnCount(); i++) // On recupère les nom des colonnes
+                {
+                    nom[i-1] = rsMeta.getColumnName(i).toUpperCase();
+                    //System.out.printf("%s ",nom[i-1]);
+                }
+
+
+                rs.last(); // on place le curseur à la fin 
+                int nombreLignes = rs.getRow(); //on récupère le numéro de la ligne 
+                rs.beforeFirst(); //on replace le curseur avant la première ligne 
+                int nombreColonnes = rsMeta.getColumnCount();
+                //System.out.println("Nombre de ligne(s) : "+nombreLignes+"\n"+"Nombre de colonne(s) : "+rsMeta.getColumnCount());
+
+                colonnes = new Object[nombreLignes][nombreColonnes];
+                //colonnes = new String[nombreLignes-1][nombreColonnes-1]; 
+
+
+                while(rs.next())
+                {   
+                    Object obj[] = new Object[nombreColonnes];
+                    for(int i = 0 ; i < nombreColonnes ; i++)
+                    {
+                        obj[i] = rs.getObject(i+1);
+                    }
+
+                    for(int el = 0 ; el < nombreColonnes ; el++)
+                    {
+                        colonnes [rs.getRow()-1][el] = obj[el];
+                    }
+                }
+           
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
         
-        return mod;
+        mod = new ModeleDonnee(nom, colonnes);
+        if(mod == null)
+            return null;
+        else
+             return mod;
     }
     
     public static void main (String[]arg)
