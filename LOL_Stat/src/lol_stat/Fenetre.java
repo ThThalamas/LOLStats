@@ -24,6 +24,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -44,10 +45,14 @@ import javax.swing.text.JTextComponent;
 public class Fenetre extends JFrame {      
     protected JScrollPane scrollMenuPrinc; // mais c ce scrollPane qu'il faut afficher et non la jtable, puisqu'il la contient(la JTable), je l'ai déjà fait dans menuPrinc
     protected JScrollPane scrollLancerPartie;
-    private Connection con;
+    protected PreparedStatement pstmtMMR;
+    protected PreparedStatement pstmtROLE;
+    protected PreparedStatement pstmtCHAMP;
+    protected Connection con;
     
     public Fenetre() {
         super();
+        
         
         scrollMenuPrinc = new JScrollPane();
         scrollLancerPartie = new JScrollPane();
@@ -55,10 +60,13 @@ public class Fenetre extends JFrame {
         {
             con = DriverManager.getConnection(
             "jdbc:oracle:thin:@134.214.112.67:1521:orcl","p1603697","267785");
-            
+            pstmtMMR = con.prepareStatement("Select Pseudo,rank,mmr from joueur order by mmr desc",ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+            pstmtROLE = con.prepareStatement("select distinct pseudo,rank,nom,role from joueur,partie,champion where joueur.idjoueur = partie.idjoueur and partie.idchamp = champion.idchamp  order by role",ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+            pstmtCHAMP = con.prepareStatement("select nom,role from champion order by role",ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
         }catch(SQLException e){
             e.printStackTrace();
         }
+        
         
         build();
     }
@@ -110,7 +118,7 @@ public class Fenetre extends JFrame {
         
         JButton mmr = new JButton("Afficher joueurs triés par MMR");
         JButton role = new JButton("Afficher joueurs triés par rôle"); 
-        JButton afficher = new JButton("Afficher champions");
+        JButton afficherChamp = new JButton("Afficher champions");
         
         
         panelbouton.setLayout(new GridLayout(3,1,20,20));
@@ -119,7 +127,7 @@ public class Fenetre extends JFrame {
         
         panelbouton.add(mmr);
         panelbouton.add(role);
-        panelbouton.add(afficher);
+        panelbouton.add(afficherChamp);
         
         
 
@@ -131,8 +139,27 @@ public class Fenetre extends JFrame {
                 @Override
                 public void actionPerformed(ActionEvent e)
                 {
-                    String requete = "select * from Joueur order by mmr desc";
-                    JTable table = new JTable(requete(con,requete));
+                    JTable table = new JTable(requete(con,pstmtMMR));
+                    scrollMenuPrinc.setViewportView(table);
+                    scrollMenuPrinc.revalidate();
+                    scrollMenuPrinc.repaint();
+                };
+        });
+        role.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e)
+                {
+                    JTable table = new JTable(requete(con,pstmtROLE));
+                    scrollMenuPrinc.setViewportView(table);
+                    scrollMenuPrinc.revalidate();
+                    scrollMenuPrinc.repaint();
+                };
+        });
+        afficherChamp.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e)
+                {
+                    JTable table = new JTable(requete(con,pstmtCHAMP));
                     scrollMenuPrinc.setViewportView(table);
                     scrollMenuPrinc.revalidate();
                     scrollMenuPrinc.repaint();
@@ -318,7 +345,7 @@ public class Fenetre extends JFrame {
         return panel;
     }
     
-    public ModeleDonnee requete(Connection con,String requête) // retourne une instance de ModeleDonnee
+    public ModeleDonnee requete(Connection con,PreparedStatement requete) // retourne une instance de ModeleDonnee
     {
         
         String []nom = null ;
@@ -330,8 +357,8 @@ public class Fenetre extends JFrame {
         try
         {
             try(
-                Statement stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
-                ResultSet rs = stmt.executeQuery(requête);
+                //Statement stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+                ResultSet rs = requete.executeQuery();
                 
             ){
                 rsMeta = rs.getMetaData();
