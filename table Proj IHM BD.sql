@@ -10,6 +10,13 @@ begin
 end ajouterJoueur;
 /
 
+
+
+
+
+
+
+delete joueur where pseudo='matheo';
 delete joueur where idjoueur = 13;
 select * from joueur;
 
@@ -50,4 +57,6 @@ group by role having count(*)=
 select distinct role from champion;
 
 
-select nom from champion where role='adc';
+select nom from champion where role='Adc';
+
+select count(*) from joueur,partie where joueur.idjoueur=partie.idjoueur and gagnant=1 and pseudo='IAMUTO';

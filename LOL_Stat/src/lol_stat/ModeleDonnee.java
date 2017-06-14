@@ -6,6 +6,7 @@
 package lol_stat;
 
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
 /**
@@ -34,6 +35,10 @@ public class ModeleDonnee extends AbstractTableModel implements TableModel{
         this.nomColonnes = mod.nomColonnes;
         this.données = mod.données;
         
+    }
+
+    ModeleDonnee(Object[][] data, String[] nom) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
@@ -68,6 +73,15 @@ public class ModeleDonnee extends AbstractTableModel implements TableModel{
     {
         données[row][col] = value;
     }
-    
+    public void addRow(Object []data)
+    {
+        Object[][]donTemp = données;
+        données = new Object[getRowCount()+1][getColumnCount()];
+        données = donTemp;
+        for(int i =0; i <getColumnCount();i++ )
+        {
+            données[getRowCount()-1][i] = data[i];
+        }
+    }
 }
 

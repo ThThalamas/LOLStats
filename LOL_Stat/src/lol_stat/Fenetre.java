@@ -49,6 +49,7 @@ import javax.swing.text.JTextComponent;
 import static jdk.internal.org.objectweb.asm.util.Printer.TYPES;
 import java.sql.Types;
 import java.util.ArrayList;
+import javax.swing.table.DefaultTableModel;
 
 public class Fenetre extends JFrame {      
     protected JScrollPane scrollMenuPrinc; // mais c ce scrollPane qu'il faut afficher et non la jtable, puisqu'il la contient(la JTable), je l'ai déjà fait dans menuPrinc
@@ -56,7 +57,9 @@ public class Fenetre extends JFrame {
     protected PreparedStatement pstmtMMR;
     protected PreparedStatement pstmtROLE;
     protected PreparedStatement pstmtCHAMP;
-    
+    protected JComboBox selectJoueurStat;
+    protected JComboBox selectJoueurLancer;
+    protected int nbJoueurAdd = 0;
     protected Connection con;
     
     public Fenetre() {
@@ -65,6 +68,7 @@ public class Fenetre extends JFrame {
         
         scrollMenuPrinc = new JScrollPane();
         scrollLancerPartie = new JScrollPane();
+        
         try
         {
             con = DriverManager.getConnection(
@@ -236,7 +240,7 @@ public class Fenetre extends JFrame {
                             boolean reussie = true;
                             if(Pseudotf != null)
                             {
-                                pseu = new String(Pseudotf.getText());
+                                pseu = new String(Pseudotf.getText().toUpperCase());
                                
                                 //cst.setString("Pseudo",Pseudotf.getText());
                                 if(Mmrtf != null)
@@ -245,7 +249,7 @@ public class Fenetre extends JFrame {
                                     
                                     //cst.setInt("MMR",mmrtf.;)
                                     if(rang != null)
-                                        rangg = new String(rang.getText());
+                                        rangg = new String(rang.getText().toUpperCase());
                                     else
                                         reussie = false;
                                 }
@@ -266,6 +270,10 @@ public class Fenetre extends JFrame {
                                 if(!exec)
                                 {
                                     JOptionPane.showMessageDialog(null, "Insertion réussie !");
+                                    rafraichirSelect(selectJoueurLancer,new ModeleDonnee(requete(con,"select pseudo from joueur")),"Joueur");
+                                    rafraichirSelect(selectJoueurStat,new ModeleDonnee(requete(con,"select pseudo from joueur")),"Selectionner Joueur");
+
+
                                 }
                                 else
                                     JOptionPane.showMessageDialog(null, "L'Insertion n'as pas réussie ");
@@ -284,6 +292,9 @@ public class Fenetre extends JFrame {
         });
         return panel;
     }
+    
+    
+    
 
     
     
@@ -291,7 +302,6 @@ public class Fenetre extends JFrame {
    public JPanel lancerPartie(){
         JButton jButton1;
         JButton jButton2;
-        JComboBox<String> jComboBox1;
         JComboBox<String> jComboBox2;
         JComboBox<String> jComboBox3;
         
@@ -302,15 +312,12 @@ public class Fenetre extends JFrame {
         
         // End of variables declaration
        
-        jComboBox1 = new JComboBox<>();
-        ModeleDonnee mod = new ModeleDonnee(requete(con,"select pseudo from joueur"));
+        selectJoueurLancer = new JComboBox<>();
+        rafraichirSelect(selectJoueurLancer,new ModeleDonnee(requete(con,"select pseudo from joueur")),"Joueur");
         
         
-        jComboBox1.addItem("Joueur");
-        for(int i = 0 ; i < mod.getRowCount(); i++)
-        {
-            jComboBox1.addItem(mod.getValueAt(i,0).toString());
-        }
+        
+        
         jComboBox2 = new JComboBox<>();
         jComboBox2.addItem("Champion");
         
@@ -324,11 +331,11 @@ public class Fenetre extends JFrame {
         {
             jComboBox3.addItem(mod3.getValueAt(i, 0).toString());
         }
-        jComboBox1.setPreferredSize(dim);
+        selectJoueurLancer.setPreferredSize(dim);
         jComboBox2.setPreferredSize(dim);
         jComboBox3.setPreferredSize(dim);
         jButton1 = new JButton();
-        JText = new JTextArea();
+        JText = new JTextArea("Il faut 10 joueurs pour une Partie");
         jButton2 = new JButton();
         
  
@@ -364,7 +371,7 @@ public class Fenetre extends JFrame {
                         .addComponent(JText, GroupLayout.PREFERRED_SIZE, 247, GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(44, 44, 44)
-                        .addComponent(jComboBox1, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(selectJoueurLancer, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE)
                         .addGap(64, 64, 64)
                         .addComponent(jComboBox3, GroupLayout.PREFERRED_SIZE, 112, GroupLayout.PREFERRED_SIZE)
                         .addGap(62, 62, 62)
@@ -384,7 +391,7 @@ public class Fenetre extends JFrame {
                     .addComponent(JText, GroupLayout.DEFAULT_SIZE, 271, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 44, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                    .addComponent(jComboBox1, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
+                    .addComponent(selectJoueurLancer, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
                     .addComponent(jComboBox3, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
                     .addComponent(jComboBox2, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton1, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE))
@@ -394,7 +401,7 @@ public class Fenetre extends JFrame {
         );
     
         
-        panel.add(jComboBox1);
+        panel.add(selectJoueurLancer);
         panel.add(jComboBox2);
         panel.add(jComboBox3);
         panel.add(jButton1);
@@ -412,11 +419,57 @@ public class Fenetre extends JFrame {
                 ModeleDonnee mod2 = new ModeleDonnee(requete(con,"select nom from champion where role ='"+selec+"'"));
                 
         
-        
+                jComboBox2.removeAllItems();
                 for(int i = 0 ; i < mod2.getRowCount(); i++)
                 {
                     jComboBox2.addItem(mod2.getValueAt(i, 0).toString());
                 }
+            }
+        });
+        Object[][]data = new Object[0][0];
+        String[]nom = {"Joueur","Role","Champion"};
+        DefaultTableModel modJoueur = new DefaultTableModel(data,nom);
+        
+        
+        jButton1.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Object joueur,role,champion;
+                int indJoueur = selectJoueurLancer.getSelectedIndex(),
+                        indRole = jComboBox3.getSelectedIndex(),
+                        indChamp = jComboBox2.getSelectedIndex();
+                if(nbJoueurAdd < 10)
+                {
+                    if(indJoueur != 0 && indRole != 0  )
+                    {
+                        joueur = selectJoueurLancer.getSelectedItem().toString();
+                        role = jComboBox3.getSelectedItem().toString();
+                        champion = jComboBox2.getSelectedItem().toString();
+
+                        Object[]joueurs = {joueur,role,champion};
+
+                        modJoueur.addRow(joueurs);
+                        JTable jt = new JTable(modJoueur);
+                        scrollLancerPartie.setViewportView(jt);
+                        nbJoueurAdd++;
+                        selectJoueurLancer.remove(selectJoueurLancer.getSelectedIndex());
+                        
+                    }
+                    else
+                        JOptionPane.showMessageDialog(null, "                   ERREUR !!!\n"
+                                + "Un des champs de la séléction est vide");
+                }
+                else
+                    JOptionPane.showMessageDialog(null, "Il y à déjà 10 joueurs");
+                       
+            }
+        });
+        jButton2.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(nbJoueurAdd<10)
+                    JOptionPane.showMessageDialog(null, "Il n'y a pas assez de joueurs pour lancer une partie\nIl en faut 10");
+                
             }
         });
         return panel;
@@ -434,22 +487,19 @@ public class Fenetre extends JFrame {
         JLabel nombrevalue = new JLabel("null");
         JLabel pourcent = new JLabel("Nombre de victoire :");
         JLabel pourcentvalue = new JLabel("null");
-        
-        ModeleDonnee mod = new ModeleDonnee(requete(con,"select pseudo from joueur"));
-        
-        JComboBox selectjoueur = new JComboBox();
-        selectjoueur.addItem("Selectionner Joueur");
-        for(int i = 0 ; i < mod.getRowCount(); i++)
-        {
-            selectjoueur.addItem(mod.getValueAt(i, 0));
-        }
-        selectjoueur.addActionListener(new ActionListener(){
+        selectJoueurStat = new JComboBox();
+        rafraichirSelect(selectJoueurStat,new ModeleDonnee(requete(con,"select pseudo from joueur")),"Selectionner Joueur");
+
+        selectJoueurStat.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
                 String joueurselec;
+                
+
                 try{
-                    joueurselec = selectjoueur.getSelectedItem().toString();
+                    joueurselec = selectJoueurStat.getSelectedItem().toString();
                     try(
+                            
                             Statement stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
                             ResultSet rs = stmt.executeQuery("select count(*) from joueur, partie where joueur.idjoueur = partie.idjoueur and pseudo ='"+joueurselec+"'");
                             Statement stmt2 = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
@@ -464,21 +514,26 @@ public class Fenetre extends JFrame {
                             ResultSet rs3 = stmt3.executeQuery("select count(*) from joueur,partie where joueur.idjoueur=partie.idjoueur and gagnant=1 and pseudo='"+joueurselec+"'");
                             ){
                         
-                        rs.next();
-                        nombrevalue.setText(rs.getBigDecimal(1).toString());
-                        rs2.next();
-                        mainValue.setText(rs2.getString(1).toString());
-                        rs3.next();
-                        pourcentvalue.setText(rs3.getBigDecimal(1).toString());
-                        
-                    //select count(*) from joueur, partie where joueur.idjoueur = partie.idjoueur and pseudo ='{joueurselec}'
-                    /*select role from \n" +
-                        "(select pseudo, role from joueur join partie using(idjoueur) join champion using(idchamp)\n" +
-                        "where pseudo='{joueurselec}') \n" +
-                        "group by role having count(*)= \n" +
-                        "(select max(count(*)) from (select pseudo,role from joueur join partie using(idjoueur) join champion using(idchamp)\n" +
-                        "where pseudo='{joueurselec}') group by role)*/        
-                    //mainValue.setText(new ModeleDonnee(requete(con, "")).getValueAt(0,0).toString());
+                            
+                            
+                            try{
+                                rs.next();
+                                rs2.next();
+                                rs3.next();
+                                nombrevalue.setText(rs.getBigDecimal(1).toString());
+
+                                mainValue.setText(rs2.getString(1).toString());
+
+                                pourcentvalue.setText(rs3.getBigDecimal(1).toString());
+                                
+                            }catch(Exception exc)
+                            {
+                                
+                                JOptionPane.showMessageDialog(null, "Ce joueur n'a pas fait de partie");
+                            }
+                            
+                            
+                       
                     }
                 }catch(Exception exe)
                 {
@@ -502,7 +557,7 @@ public class Fenetre extends JFrame {
         
         
         
-        combo.add(selectjoueur);
+        combo.add(selectJoueurStat);
         
         
         
@@ -647,6 +702,16 @@ public class Fenetre extends JFrame {
             return null;
         else
              return mod;
+    }
+    
+    public void rafraichirSelect(JComboBox combo,ModeleDonnee mod,String premierElem)
+    {
+        combo.removeAllItems();
+        combo.addItem(premierElem);
+        for(int i = 0 ; i < mod.getRowCount(); i++)
+        {
+            combo.addItem(mod.getValueAt(i,0).toString());
+        }
     }
     
     public static void main (String[]arg)
