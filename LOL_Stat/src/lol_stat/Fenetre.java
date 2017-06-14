@@ -294,14 +294,39 @@ public class Fenetre extends JFrame {
         JComboBox<String> jComboBox1;
         JComboBox<String> jComboBox2;
         JComboBox<String> jComboBox3;
+        
+        Dimension dim = new Dimension(200,40);
+        
         JTextArea JText;
         
         
         // End of variables declaration
        
         jComboBox1 = new JComboBox<>();
+        ModeleDonnee mod = new ModeleDonnee(requete(con,"select pseudo from joueur"));
+        
+        
+        jComboBox1.addItem("Joueur");
+        for(int i = 0 ; i < mod.getRowCount(); i++)
+        {
+            jComboBox1.addItem(mod.getValueAt(i,0).toString());
+        }
         jComboBox2 = new JComboBox<>();
+        jComboBox2.addItem("Champion");
+        
         jComboBox3 = new JComboBox<>();
+        jComboBox3.addItem("Role");
+        ModeleDonnee mod3 = new ModeleDonnee(requete(con,"select distinct role from champion"));
+        
+        
+        
+        for(int i = 0 ; i < mod3.getRowCount(); i++)
+        {
+            jComboBox3.addItem(mod3.getValueAt(i, 0).toString());
+        }
+        jComboBox1.setPreferredSize(dim);
+        jComboBox2.setPreferredSize(dim);
+        jComboBox3.setPreferredSize(dim);
         jButton1 = new JButton();
         JText = new JTextArea();
         jButton2 = new JButton();
@@ -309,14 +334,7 @@ public class Fenetre extends JFrame {
  
         setPreferredSize(new Dimension(1000, 700));
  
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Joueur", "item 2", "Item 3", "Item 4" }));
-        jComboBox1.setPreferredSize(new Dimension(60, 20));
- 
-        jComboBox2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Champion", "Item 2", "Item 3", "Item 4" }));
-        jComboBox2.setPreferredSize(new Dimension(60, 20));
- 
-        jComboBox3.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Rôle Champion", "Item 2", "Item 3", "Item 4" }));
-        jComboBox3.setPreferredSize(new Dimension(60, 20));
+        
  
         jButton1.setBackground(new java.awt.Color(204, 204, 204));
         jButton1.setText("Ajouter Joueur");
@@ -385,7 +403,22 @@ public class Fenetre extends JFrame {
         panel.add(scrollLancerPartie);
         
         
+        jComboBox3.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                
+                String selec = jComboBox3.getSelectedItem().toString();
+                
+                ModeleDonnee mod2 = new ModeleDonnee(requete(con,"select nom from champion where role ='"+selec+"'"));
+                
         
+        
+                for(int i = 0 ; i < mod2.getRowCount(); i++)
+                {
+                    jComboBox2.addItem(mod2.getValueAt(i, 0).toString());
+                }
+            }
+        });
         return panel;
     }
  
@@ -396,10 +429,10 @@ public class Fenetre extends JFrame {
     {
         JPanel label = new JPanel();
         JLabel Main = new JLabel("Main :                   ");
-        JLabel Mainvalue = new JLabel("null");
+        JLabel mainValue = new JLabel("null");
         JLabel nombre = new JLabel("Nombre de partie(s) jouée(s) :");
         JLabel nombrevalue = new JLabel("null");
-        JLabel pourcent = new JLabel("Pourcentage de victoire :");
+        JLabel pourcent = new JLabel("Nombre de victoire :");
         JLabel pourcentvalue = new JLabel("null");
         
         ModeleDonnee mod = new ModeleDonnee(requete(con,"select pseudo from joueur"));
@@ -413,16 +446,52 @@ public class Fenetre extends JFrame {
         selectjoueur.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
-                String joueurselec = selectjoueur.getSelectedItem().toString();
-                nombrevalue.setText(new ModeleDonnee(requete(con,"select count(*) from joueur, partie "
-                        + "where joueur.idjoueur = partie.idjoueur and pseudo ='{joueurselec}' ")).getValueAt(0,0).toString());
+                String joueurselec;
+                try{
+                    joueurselec = selectjoueur.getSelectedItem().toString();
+                    try(
+                            Statement stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+                            ResultSet rs = stmt.executeQuery("select count(*) from joueur, partie where joueur.idjoueur = partie.idjoueur and pseudo ='"+joueurselec+"'");
+                            Statement stmt2 = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+                            ResultSet rs2 = stmt2.executeQuery("select role from \n" +
+                            "(select pseudo, role from joueur join partie using(idjoueur) join champion using(idchamp)\n" +
+                            "where pseudo='"+joueurselec+"') " +
+                            "group by role having count(*)= " +
+                            "(select max(count(*)) from (select pseudo,role from joueur join partie using(idjoueur) join champion using(idchamp)" +
+                            "where pseudo='"+joueurselec+"') group by role)");
+                            
+                            Statement stmt3 = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+                            ResultSet rs3 = stmt3.executeQuery("select count(*) from joueur,partie where joueur.idjoueur=partie.idjoueur and gagnant=1 and pseudo='"+joueurselec+"'");
+                            ){
+                        
+                        rs.next();
+                        nombrevalue.setText(rs.getBigDecimal(1).toString());
+                        rs2.next();
+                        mainValue.setText(rs2.getString(1).toString());
+                        rs3.next();
+                        pourcentvalue.setText(rs3.getBigDecimal(1).toString());
+                        
+                    //select count(*) from joueur, partie where joueur.idjoueur = partie.idjoueur and pseudo ='{joueurselec}'
+                    /*select role from \n" +
+                        "(select pseudo, role from joueur join partie using(idjoueur) join champion using(idchamp)\n" +
+                        "where pseudo='{joueurselec}') \n" +
+                        "group by role having count(*)= \n" +
+                        "(select max(count(*)) from (select pseudo,role from joueur join partie using(idjoueur) join champion using(idchamp)\n" +
+                        "where pseudo='{joueurselec}') group by role)*/        
+                    //mainValue.setText(new ModeleDonnee(requete(con, "")).getValueAt(0,0).toString());
+                    }
+                }catch(Exception exe)
+                {
+                    exe.printStackTrace();
+                }
+                
                 //pourcent.setText(new ModeleDonnee(requete(con,"select ")));
             }
             
         });
         
         label.add(Main);
-        label.add(Mainvalue);        
+        label.add(mainValue);        
         label.add(nombre);
         label.add(nombrevalue);
         label.add(pourcent); 

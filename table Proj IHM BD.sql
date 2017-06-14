@@ -13,12 +13,41 @@ end ajouterJoueur;
 delete joueur where idjoueur = 13;
 select * from joueur;
 
-select nom from joueur,partie,champion 
+select pseudo, role from joueur,partie,champion 
 where pseudo = 'IAMUTO' 
 and joueur.idjoueur = partie.idjoueur 
 and partie.idchamp = champion.idchamp
-group by nom having max(partie.idchamp)=
-(select count(partie.idchamp) from joueur, partie where pseudo='IAMUTO' and joueur.idjoueur = partie.idjoueur );
-(select count(partie.idchamp) from joueur, partie where pseudo='IAMUTO' and joueur.idjoueur = partie.idjoueur );
+group by pseudo having count(idchamp) = (select count(idchamp) from joueur,partie,champion 
+where pseudo = 'IAMUTO' 
+and joueur.idjoueur = partie.idjoueur 
+and partie.idchamp = champion.idchamp
+group by pseudo having max(count(idchamp)));
+
+select role from 
+(select pseudo, role from joueur join partie using(idjoueur) join champion using(idchamp)
+where pseudo='IAMUTO') 
+group by role having count(*)= 
+(select max(count(*)) from (select pseudo,role from joueur join partie using(idjoueur) join champion using(idchamp)
+where pseudo='IAMUTO') group by role);
+
+select count(*) from joueur, partie where joueur.idjoueur = partie.idjoueur and pseudo ='IAMUTO';
 
 //demander comment récuperer un nom de champ qui est le plus utiliser c'est à dire max(count())
+select * from (select pseudo, role from joueur join partie using(idjoueur) join champion using(idchamp)
+where pseudo='IAMUTO');
+
+
+select count(*) from joueur, partie where joueur.idjoueur = partie.idjoueur and pseudo ='IAMUTO';
+
+select pseudo,role from 
+(select pseudo, role from joueur join partie using(idjoueur) join champion using(idchamp)
+) 
+group by role having count(*)= 
+(select max(count(*)) from (select pseudo,role from joueur join partie using(idjoueur) join champion using(idchamp)
+) group by role);
+
+
+select distinct role from champion;
+
+
+select nom from champion where role='adc';
